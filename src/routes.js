@@ -23,7 +23,7 @@ function RoutesApp() {
             </PrivateRoute>
           } 
         />
-        <Route path="*" element={<Erro />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );
