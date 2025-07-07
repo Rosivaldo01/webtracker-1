@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/webtracker-1/static/css/main.6572a9e3.css",
+    "main.js": "/webtracker-1/static/js/main.74d11976.js",
+    "index.html": "/webtracker-1/index.html",
+    "main.6572a9e3.css.map": "/webtracker-1/static/css/main.6572a9e3.css.map",
+    "main.74d11976.js.map": "/webtracker-1/static/js/main.74d11976.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6572a9e3.css",
+    "static/js/main.74d11976.js"
+  ]
+}
