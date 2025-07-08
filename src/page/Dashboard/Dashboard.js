@@ -3,24 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth, database } from "../../firebase";
 import { ref, push, onValue, update, remove } from "firebase/database";
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 function Dashboard() {
   const navigate = useNavigate();
-
-  const hasEmoji = (str) => {
-    return /([\u2700-\u27BF]|[\uE000-\uF8FF]|[\uD83C-\uDBFF\uDC00-\uDFFF])/.test(str);
-  };
-
-  const isInvalid = (value) => {
-    const trimmed = value.trim();
-    return (
-      trimmed === "" ||
-      /^"+$/.test(trimmed) || // apenas aspas duplas
-      /^'+$/.test(trimmed) || // apenas aspas simples
-      hasEmoji(trimmed)
-    );
-  };
 
   const [nome, setNome] = useState("");
   const [matricula, setMatricula] = useState("");
@@ -33,7 +19,7 @@ function Dashboard() {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid);
       } else {
@@ -60,42 +46,84 @@ function Dashboard() {
     return () => unsubscribe();
   }, [userId]);
 
+  const regexLetrasEspacos = /^[\p{L} ]+$/u;
+  const regexAlnumEspacos = /^[\p{L}\d ]+$/u;
+  const regexNumeros = /^\d+$/;
+
+  const temLetra = /\p{L}/u;
+  const temLetraOuNumero = /[\p{L}\d]/u;
+
+  function validarLetrasEspacos(campo, nomeCampo) {
+    if (!regexLetrasEspacos.test(campo) || !temLetra.test(campo)) {
+      alert(`${nomeCampo} inválido! Use apenas letras e espaços, e pelo menos uma letra.`);
+      return false;
+    }
+    if (campo.trim().length < 3) {
+      alert(`${nomeCampo} deve ter pelo menos 3 caracteres.`);
+      return false;
+    }
+    return true;
+  }
+
+  function validarAlnumEspacos(campo, nomeCampo) {
+    if (!regexAlnumEspacos.test(campo) || !temLetraOuNumero.test(campo)) {
+      alert(`${nomeCampo} inválido! Use letras, números e espaços, com pelo menos um caractere válido.`);
+      return false;
+    }
+    if (campo.trim().length < 3) {
+      alert(`${nomeCampo} deve ter pelo menos 3 caracteres.`);
+      return false;
+    }
+    return true;
+  }
+
+  function validarNumeros(campo, nomeCampo) {
+    if (!regexNumeros.test(campo)) {
+      alert(`${nomeCampo} inválido! Use apenas números.`);
+      return false;
+    }
+    if (campo.trim().length < 3) {
+      alert(`${nomeCampo} deve ter pelo menos 3 caracteres.`);
+      return false;
+    }
+    if (campo.length > 20) {
+      alert(`${nomeCampo} não pode ter mais que 20 caracteres.`);
+      return false;
+    }
+    return true;
+  }
+
   const adicionarRegistro = () => {
-    if (
-      isInvalid(nome) ||
-      isInvalid(matricula) ||
-      isInvalid(propriedade) ||
-      isInvalid(tarefa) ||
-      isInvalid(equipamento)
-    ) {
-      alert("Opps!!! Não é permitido compo vazio, apenas com espaços, aspas ou emoje! Corriga por gentileza.");
+    if (!nome || !matricula || !propriedade || !tarefa || !equipamento) {
+      alert("Preencha todos os campos!");
       return;
     }
 
+    if (!validarLetrasEspacos(nome, "Colaborador")) return;
+    if (!validarNumeros(matricula, "Matrícula")) return;
+    if (!validarLetrasEspacos(propriedade, "Propriedade")) return;
+    if (!validarAlnumEspacos(tarefa, "Tarefa")) return;
+    if (!validarAlnumEspacos(equipamento, "Equipamento")) return;
+
     if (
-      nome.trim().length > 50 ||
-      matricula.trim().length > 20 ||
-      propriedade.trim().length > 50 ||
-      tarefa.trim().length > 100 ||
-      equipamento.trim().length > 50
+      nome.length > 50 ||
+      propriedade.length > 50 ||
+      tarefa.length > 100 ||
+      equipamento.length > 50
     ) {
-      alert("Um dos campos excedeu o tamanho máximo permitido.");
+      alert("Um dos campos excedeu o tamanho permitido.");
       return;
     }
 
-    const safeNome = DOMPurify.sanitize(nome.trim());
-    const safeMatricula = DOMPurify.sanitize(matricula.trim());
-    const safePropriedade = DOMPurify.sanitize(propriedade.trim());
-    const safeTarefa = DOMPurify.sanitize(tarefa.trim());
-    const safeEquipamento = DOMPurify.sanitize(equipamento.trim());
+    const safeData = {
+      nome: DOMPurify.sanitize(nome),
+      matricula: DOMPurify.sanitize(matricula),
+      propriedade: DOMPurify.sanitize(propriedade),
+      tarefa: DOMPurify.sanitize(tarefa),
+      equipamento: DOMPurify.sanitize(equipamento),
+    };
 
-    push(ref(database, `registros/${userId}`), {
-      nome: safeNome,
-      matricula: safeMatricula,
-      propriedade: safePropriedade,
-      tarefa: safeTarefa,
-      equipamento: safeEquipamento,
-    });
+    push(ref(database, `registros/${userId}`), safeData);
 
     setNome("");
     setMatricula("");
@@ -116,46 +144,42 @@ function Dashboard() {
   };
 
   const salvarEdicao = (id) => {
-    if (
-      isInvalid(editValues.nome) ||
-      isInvalid(editValues.matricula) ||
-      isInvalid(editValues.propriedade) ||
-      isInvalid(editValues.tarefa) ||
-      isInvalid(editValues.equipamento)
-    ) {
-      alert("Preencha todos os campos corretamente (não pode estar vazio, só com espaços, só aspas ou conter emojis).");
-      return;
-    }
+    if (!validarLetrasEspacos(editValues.nome, "Colaborador")) return;
+    if (!validarNumeros(editValues.matricula, "Matrícula")) return;
+    if (!validarLetrasEspacos(editValues.propriedade, "Propriedade")) return;
+    if (!validarAlnumEspacos(editValues.tarefa, "Tarefa")) return;
+    if (!validarAlnumEspacos(editValues.equipamento, "Equipamento")) return;
 
     if (
-      editValues.nome.trim().length > 50 ||
-      editValues.matricula.trim().length > 20 ||
-      editValues.propriedade.trim().length > 50 ||
-      editValues.tarefa.trim().length > 100 ||
-      editValues.equipamento.trim().length > 50
+      editValues.nome.length > 50 ||
+      editValues.propriedade.length > 50 ||
+      editValues.tarefa.length > 100 ||
+      editValues.equipamento.length > 50
     ) {
-      alert("Um dos campos excedeu o tamanho máximo permitido.");
+      alert("Um dos campos excedeu o tamanho permitido.");
+      return;
+    }
+    if (editValues.matricula.length > 20) {
+      alert("A matrícula não pode ter mais que 20 caracteres.");
       return;
     }
 
     const safeEditValues = {
-      nome: DOMPurify.sanitize(editValues.nome.trim()),
-      matricula: DOMPurify.sanitize(editValues.matricula.trim()),
-      propriedade: DOMPurify.sanitize(editValues.propriedade.trim()),
-      tarefa: DOMPurify.sanitize(editValues.tarefa.trim()),
-      equipamento: DOMPurify.sanitize(editValues.equipamento.trim()),
+      nome: DOMPurify.sanitize(editValues.nome),
+      matricula: DOMPurify.sanitize(editValues.matricula),
+      propriedade: DOMPurify.sanitize(editValues.propriedade),
+      tarefa: DOMPurify.sanitize(editValues.tarefa),
+      equipamento: DOMPurify.sanitize(editValues.equipamento),
     };
 
-    const registroRef = ref(database, `registros/${userId}/${id}`);
-    update(registroRef, safeEditValues);
+    update(ref(database, `registros/${userId}/${id}`), safeEditValues);
     setEditId(null);
     setEditValues({});
   };
 
   const excluirRegistro = (id) => {
     if (window.confirm("Tem certeza que deseja excluir este registro?")) {
-      const registroRef = ref(database, `registros/${userId}/${id}`);
-      remove(registroRef);
+      remove(ref(database, `registros/${userId}/${id}`));
     }
   };
 
@@ -165,15 +189,58 @@ function Dashboard() {
     navigate("/login");
   };
 
-  if (!userId) {
-    return <p>Carregando...</p>;
-  }
+  if (!userId) return <p>Carregando...</p>;
+
+  const inputs = [
+    {
+      label: "Colaborador",
+      placeholder: "Nome do colaborador",
+      value: nome,
+      setter: setNome,
+      max: 50,
+    },
+    {
+      label: "Matrícula",
+      placeholder: "Número da matrícula",
+      value: matricula,
+      setter: setMatricula,
+      // sem maxLength aqui para liberar digitação
+    },
+    {
+      label: "Propriedade",
+      placeholder: "Propriedade",
+      value: propriedade,
+      setter: setPropriedade,
+      max: 50,
+    },
+    {
+      label: "Tarefa",
+      placeholder: "Tarefa",
+      value: tarefa,
+      setter: setTarefa,
+      max: 100,
+    },
+    {
+      label: "Equipamento",
+      placeholder: "Equipamento",
+      value: equipamento,
+      setter: setEquipamento,
+      max: 50,
+    },
+  ];
 
   return (
     <div style={{ maxWidth: "1024px", margin: "2rem auto", textAlign: "center" }}>
       <h1>Registro de Tarefas</h1>
 
-      <div style={{ margin: "2rem 0", maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}>
+      <div
+        style={{
+          margin: "2rem 0",
+          maxWidth: 600,
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+      >
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -189,14 +256,11 @@ function Dashboard() {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           }}
         >
-          {[
-            { label: "Colaborador", placeholder: "Nome do colaborador", value: nome, setter: setNome },
-            { label: "Matrícula", placeholder: "Número da matrícula", value: matricula, setter: setMatricula },
-            { label: "Propriedade", placeholder: "Propriedade", value: propriedade, setter: setPropriedade },
-            { label: "Tarefa", placeholder: "Tarefa", value: tarefa, setter: setTarefa },
-            { label: "Equipamento", placeholder: "Equipamento", value: equipamento, setter: setEquipamento },
-          ].map(({ label, placeholder, value, setter }) => (
-            <div key={label} style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+          {inputs.map(({ label, placeholder, value, setter, max }) => (
+            <div
+              key={label}
+              style={{ display: "flex", flexDirection: "column", textAlign: "left" }}
+            >
               <label
                 htmlFor={label.toLowerCase()}
                 style={{ marginBottom: "0.3rem", fontWeight: "600", color: "#34495e" }}
@@ -209,6 +273,7 @@ function Dashboard() {
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => setter(e.target.value)}
+                maxLength={max}
                 style={{
                   padding: "10px",
                   borderRadius: "6px",
@@ -219,6 +284,7 @@ function Dashboard() {
                 onFocus={(e) => (e.target.style.borderColor = "#27ae60")}
                 onBlur={(e) => (e.target.style.borderColor = "#ccc")}
                 required
+                {...(label === "Matrícula" ? { maxLength: undefined } : {})}
               />
             </div>
           ))}
@@ -236,8 +302,6 @@ function Dashboard() {
               cursor: "pointer",
               transition: "background-color 0.3s",
             }}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#219150")}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = "rgb(13, 80, 39)")}
           >
             Registrar
           </button>
@@ -263,11 +327,24 @@ function Dashboard() {
               >
                 {editId === registro.id ? (
                   <div style={{ flex: 1 }}>
-                    {["nome", "matricula", "propriedade", "tarefa", "equipamento"].map((field) => (
+                    {Object.keys(editValues).map((key, index) => (
                       <input
-                        key={field}
-                        value={editValues[field]}
-                        onChange={(e) => setEditValues({ ...editValues, [field]: e.target.value })}
+                        key={index}
+                        value={editValues[key]}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, [key]: e.target.value })
+                        }
+                        maxLength={
+                          key === "nome"
+                            ? 50
+                            : key === "matricula"
+                            ? undefined // sem limite aqui
+                            : key === "propriedade"
+                            ? 50
+                            : key === "tarefa"
+                            ? 100
+                            : 50
+                        }
                         style={{ padding: "5px", margin: "0 5px", width: "150px" }}
                       />
                     ))}
