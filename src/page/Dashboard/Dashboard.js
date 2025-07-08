@@ -8,6 +8,20 @@ import DOMPurify from 'dompurify';
 function Dashboard() {
   const navigate = useNavigate();
 
+  const hasEmoji = (str) => {
+    return /([\u2700-\u27BF]|[\uE000-\uF8FF]|[\uD83C-\uDBFF\uDC00-\uDFFF])/.test(str);
+  };
+
+  const isInvalid = (value) => {
+    const trimmed = value.trim();
+    return (
+      trimmed === "" ||
+      /^"+$/.test(trimmed) || // apenas aspas duplas
+      /^'+$/.test(trimmed) || // apenas aspas simples
+      hasEmoji(trimmed)
+    );
+  };
+
   const [nome, setNome] = useState("");
   const [matricula, setMatricula] = useState("");
   const [propriedade, setPropriedade] = useState("");
@@ -47,36 +61,33 @@ function Dashboard() {
   }, [userId]);
 
   const adicionarRegistro = () => {
-    if (!nome || !matricula || !propriedade || !tarefa || !equipamento) {
-      alert("Preencha todos os campos!");
-      return;
-    }
-    if (nome.length > 50) {
-      alert("O nome do colaborador não pode ter mais que 50 caracteres.");
-      return;
-    }
-    if (matricula.length > 20) {
-      alert("A matrícula não pode ter mais que 20 caracteres.");
-      return;
-    }
-    if (propriedade.length > 50) {
-      alert("A propriedade não pode ter mais que 50 caracteres.");
-      return;
-    }
-    if (tarefa.length > 100) {
-      alert("A tarefa não pode ter mais que 100 caracteres.");
-      return;
-    }
-    if (equipamento.length > 50) {
-      alert("O equipamento não pode ter mais que 50 caracteres.");
+    if (
+      isInvalid(nome) ||
+      isInvalid(matricula) ||
+      isInvalid(propriedade) ||
+      isInvalid(tarefa) ||
+      isInvalid(equipamento)
+    ) {
+      alert("Opps!!! Não é permitido compo vazio, apenas com espaços, aspas ou emoje! Corriga por gentileza.");
       return;
     }
 
-    const safeNome = DOMPurify.sanitize(nome);
-    const safeMatricula = DOMPurify.sanitize(matricula);
-    const safePropriedade = DOMPurify.sanitize(propriedade);
-    const safeTarefa = DOMPurify.sanitize(tarefa);
-    const safeEquipamento = DOMPurify.sanitize(equipamento);
+    if (
+      nome.trim().length > 50 ||
+      matricula.trim().length > 20 ||
+      propriedade.trim().length > 50 ||
+      tarefa.trim().length > 100 ||
+      equipamento.trim().length > 50
+    ) {
+      alert("Um dos campos excedeu o tamanho máximo permitido.");
+      return;
+    }
+
+    const safeNome = DOMPurify.sanitize(nome.trim());
+    const safeMatricula = DOMPurify.sanitize(matricula.trim());
+    const safePropriedade = DOMPurify.sanitize(propriedade.trim());
+    const safeTarefa = DOMPurify.sanitize(tarefa.trim());
+    const safeEquipamento = DOMPurify.sanitize(equipamento.trim());
 
     push(ref(database, `registros/${userId}`), {
       nome: safeNome,
@@ -105,33 +116,34 @@ function Dashboard() {
   };
 
   const salvarEdicao = (id) => {
-    if (editValues.nome.length > 50) {
-      alert("O nome do colaborador não pode ter mais que 50 caracteres.");
+    if (
+      isInvalid(editValues.nome) ||
+      isInvalid(editValues.matricula) ||
+      isInvalid(editValues.propriedade) ||
+      isInvalid(editValues.tarefa) ||
+      isInvalid(editValues.equipamento)
+    ) {
+      alert("Preencha todos os campos corretamente (não pode estar vazio, só com espaços, só aspas ou conter emojis).");
       return;
     }
-    if (editValues.matricula.length > 20) {
-      alert("A matrícula não pode ter mais que 20 caracteres.");
-      return;
-    }
-    if (editValues.propriedade.length > 50) {
-      alert("A propriedade não pode ter mais que 50 caracteres.");
-      return;
-    }
-    if (editValues.tarefa.length > 100) {
-      alert("A tarefa não pode ter mais que 100 caracteres.");
-      return;
-    }
-    if (editValues.equipamento.length > 50) {
-      alert("O equipamento não pode ter mais que 50 caracteres.");
+
+    if (
+      editValues.nome.trim().length > 50 ||
+      editValues.matricula.trim().length > 20 ||
+      editValues.propriedade.trim().length > 50 ||
+      editValues.tarefa.trim().length > 100 ||
+      editValues.equipamento.trim().length > 50
+    ) {
+      alert("Um dos campos excedeu o tamanho máximo permitido.");
       return;
     }
 
     const safeEditValues = {
-      nome: DOMPurify.sanitize(editValues.nome),
-      matricula: DOMPurify.sanitize(editValues.matricula),
-      propriedade: DOMPurify.sanitize(editValues.propriedade),
-      tarefa: DOMPurify.sanitize(editValues.tarefa),
-      equipamento: DOMPurify.sanitize(editValues.equipamento),
+      nome: DOMPurify.sanitize(editValues.nome.trim()),
+      matricula: DOMPurify.sanitize(editValues.matricula.trim()),
+      propriedade: DOMPurify.sanitize(editValues.propriedade.trim()),
+      tarefa: DOMPurify.sanitize(editValues.tarefa.trim()),
+      equipamento: DOMPurify.sanitize(editValues.equipamento.trim()),
     };
 
     const registroRef = ref(database, `registros/${userId}/${id}`);
@@ -234,7 +246,7 @@ function Dashboard() {
 
       <div style={{ textAlign: "left" }}>
         {registros.length === 0 ? (
-          <p style={{ textAlign: "center", color: "gray" }}>Nenhum tarefa encontrado.</p>
+          <p style={{ textAlign: "center", color: "gray" }}>Nenhuma tarefa encontrada.</p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
             {registros.map((registro) => (
@@ -251,12 +263,26 @@ function Dashboard() {
               >
                 {editId === registro.id ? (
                   <div style={{ flex: 1 }}>
-                    <input value={editValues.nome} onChange={(e) => setEditValues({ ...editValues, nome: e.target.value })} style={{ padding: "5px", margin: "0 5px", width: "150px" }} />
-                    <input value={editValues.matricula} onChange={(e) => setEditValues({ ...editValues, matricula: e.target.value })} style={{ padding: "5px", margin: "0 5px", width: "150px" }} />
-                    <input value={editValues.propriedade} onChange={(e) => setEditValues({ ...editValues, propriedade: e.target.value })} style={{ padding: "5px", margin: "0 5px", width: "150px" }} />
-                    <input value={editValues.tarefa} onChange={(e) => setEditValues({ ...editValues, tarefa: e.target.value })} style={{ padding: "5px", margin: "0 5px", width: "150px" }} />
-                    <input value={editValues.equipamento} onChange={(e) => setEditValues({ ...editValues, equipamento: e.target.value })} style={{ padding: "5px", margin: "0 5px", width: "150px" }} />
-                    <button onClick={() => salvarEdicao(registro.id)} style={{ background: "darkgreen", color: "#fff", border: "none", borderRadius: "5px", padding: "6px 10px", cursor: "pointer", marginLeft: "5px" }}>
+                    {["nome", "matricula", "propriedade", "tarefa", "equipamento"].map((field) => (
+                      <input
+                        key={field}
+                        value={editValues[field]}
+                        onChange={(e) => setEditValues({ ...editValues, [field]: e.target.value })}
+                        style={{ padding: "5px", margin: "0 5px", width: "150px" }}
+                      />
+                    ))}
+                    <button
+                      onClick={() => salvarEdicao(registro.id)}
+                      style={{
+                        background: "darkgreen",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        padding: "6px 10px",
+                        cursor: "pointer",
+                        marginLeft: "5px",
+                      }}
+                    >
                       Salvar
                     </button>
                   </div>
@@ -272,10 +298,32 @@ function Dashboard() {
 
                 {editId !== registro.id && (
                   <div style={{ display: "flex", gap: "10px" }}>
-                    <button onClick={() => iniciarEdicao(registro)} style={{ background: "darkgreen", color: "#fff", border: "none", borderRadius: "5px", padding: "6px 10px", cursor: "pointer", height: "fit-content" }}>
+                    <button
+                      onClick={() => iniciarEdicao(registro)}
+                      style={{
+                        background: "darkgreen",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        padding: "6px 10px",
+                        cursor: "pointer",
+                        height: "fit-content",
+                      }}
+                    >
                       Editar
                     </button>
-                    <button onClick={() => excluirRegistro(registro.id)} style={{ background: "darkred", color: "#fff", border: "none", borderRadius: "5px", padding: "6px 10px", cursor: "pointer", height: "fit-content" }}>
+                    <button
+                      onClick={() => excluirRegistro(registro.id)}
+                      style={{
+                        background: "darkred",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        padding: "6px 10px",
+                        cursor: "pointer",
+                        height: "fit-content",
+                      }}
+                    >
                       Excluir
                     </button>
                   </div>
