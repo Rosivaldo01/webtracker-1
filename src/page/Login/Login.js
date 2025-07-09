@@ -1,38 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Input from '../../components/Input/input';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
+import DOMPurify from 'dompurify';
+import "./login.css"
 
 function Login() {
   const [form, setForm] = useState({ email: '', senha: '' });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // desloga automaticamente ao abrir a tela de login
-    signOut(auth);
-  }, []);
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, form.email, form.senha);
-      console.log("Login bem-sucedido");
+    setError("");
 
-      // não salva mais no localStorage
+    const emailSanitizado = DOMPurify.sanitize(form.email.trim());
+    const senhaLimpa = form.senha.trim();
+
+    if (!emailSanitizado || !senhaLimpa) {
+      setError("Preencha o email e a senha.");
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, emailSanitizado, senhaLimpa);
       navigate("/dashboard");
     } catch (error) {
       console.error("Erro ao fazer login:", error.code, error.message);
-      alert("Erro ao fazer login: " + error.message);
+      if (error.code === "auth/user-not-found") {
+        setError("Usuário não encontrado. Verifique seu email ou faça o cadastro.");
+      } else if (error.code === "auth/wrong-password") {
+        setError("Senha incorreta. Tente novamente.");
+      } else if (error.code === "auth/invalid-email") {
+        setError("Email inválido. Verifique o formato.");
+      } else if (error.code === "auth/invalid-credential") {
+        setError("Credenciais inválidas. Por favor, verifique seu email e senha.");
+      } else {
+        setError("Erro ao fazer login: " + error.message);
+      }
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '2rem auto' }}>
-      <h1 style={{fontFamily:'sans-serif'}}>Acesso do Usuário</h1><br />
+    <div className="login-container">
+      <h1>Acesso do Usuário</h1>
+      {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <Input
           label="Email"
@@ -50,26 +67,21 @@ function Login() {
           onChange={handleChange}
           placeholder="Digite sua senha"
         />
-        <button type="submit" style={{
-          padding: '0.7rem',
-          width: '100%',
-          background: 'rgb(13, 80, 39)',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '8px',
-          fontSize: '15px',
-          fontWeight: 'bold',
-          pointerEvents:'auto'
-        }}>
+        <button type="submit">
           Entrar
         </button>
-        <p style={{ textAlign: 'left', margin: '2rem' }}>
+        <p>
           Não tem cadastro:
-          <Link to='/cadastro'style={{textDecoration: 'none'}} > Clique aqui.</Link>
+          <Link to='/cadastro'> Clique aqui.</Link>
+        </p>
+        <p style={{ marginTop: '1rem', fontSize: '14px' }}>
+          Esqueceu sua senha?{' '}
+          <Link to="/reset-senha" style={{ fontWeight: 'bold', color: 'rgb(13, 80, 39)' }}>
+            Clique aqui
+          </Link>
         </p>
 
       </form>
-
     </div>
   );
 }

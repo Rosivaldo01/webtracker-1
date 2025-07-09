@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
 import './style.css';
 
 function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Observa mudanças de login/logout
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
-    // Cleanup ao desmontar
     return () => unsubscribe();
   }, []);
 
@@ -32,13 +30,17 @@ function Header() {
       <nav>
         {user ? (
           <>
-            <span>{user.displayName || "Usuário"}</span>
-            <Link to="#" onClick={handleLogout}>Sair da conta</Link>
+            <span>👤 {user.displayName || "Usuário"}</span>
+            <Link to="#" onClick={handleLogout}>🚪 Sair da conta</Link>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/cadastro">Cadastro</Link>
+            {location.pathname === "/login" && (
+              <Link to="/cadastro">✍️ Cadastro</Link>
+            )}
+            {location.pathname === "/cadastro" && (
+              <Link to="/login">🔑 Login</Link>
+            )}
           </>
         )}
       </nav>

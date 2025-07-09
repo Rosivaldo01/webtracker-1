@@ -1,0 +1,67 @@
+/* login.css */
+
+body {
+  background-color: #f4f7f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h1 {
+  text-align: center;
+  color: rgb(13, 80, 39);
+  margin-bottom: 1.5rem;
+}
+
+.login-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-container button {
+  padding: 0.7rem;
+  width: 100%;
+  background: rgb(13, 80, 39);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-container button:hover {
+  background: rgb(18, 110, 54);
+}
+
+.login-container p {
+  margin-top: 2rem;
+  text-align: left;
+  font-size: 14px;
+}
+
+.login-container a {
+  color: rgb(13, 80, 39);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.login-container a:hover {
+  text-decoration: underline;
+}
+
+.error {
+  color: red;
+  margin-bottom: 1rem;
+  font-weight: normal;
+}

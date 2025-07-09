@@ -6,6 +6,7 @@ import Login from "./page/Login/Login";
 import Erro from "./page/Erro";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./page/Dashboard/Dashboard";
+import ResetSenha from "./components/ResetSenha/ResetSenha"
 
 function RoutesApp() {
   return (
@@ -15,6 +16,7 @@ function RoutesApp() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/reset-senha" element={<ResetSenha />} />
         <Route 
           path="/dashboard" 
           element={

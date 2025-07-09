@@ -3,6 +3,8 @@ import { createUserWithEmailAndPassword, updateProfile, signOut } from "firebase
 import { auth } from "../../firebase";
 import Input from '../../components/Input/input';
 import { useNavigate, Link } from "react-router-dom";
+import DOMPurify from 'dompurify';
+import './cadastro.css';
 
 function Cadastro() {
   const [form, setForm] = useState({
@@ -21,7 +23,16 @@ function Cadastro() {
     e.preventDefault();
     setError("");
 
-    if (!form.email || !form.senha || !form.nome) {
+    const nomeSanitizado = DOMPurify.sanitize(form.nome.trim());
+    const nomeSemEspacos = nomeSanitizado.replace(/\s/g, '');
+    const nomeRegex = /^[A-Za-zÀ-ÿ0-9\s]+$/;
+
+    if (!nomeSanitizado || nomeSemEspacos.length < 10 || nomeSanitizado.length > 60 || !nomeRegex.test(nomeSanitizado)) {
+      setError("Informe o nome da companhia com pelo menos 10 letras ou números e no máximo 60 caracteres.");
+      return;
+    }
+
+    if (!form.email || !form.senha) {
       setError("Preencha todos os campos!");
       return;
     }
@@ -29,22 +40,27 @@ function Cadastro() {
     try {
       await createUserWithEmailAndPassword(auth, form.email, form.senha);
       await updateProfile(auth.currentUser, {
-        displayName: form.nome
+        displayName: nomeSanitizado
       });
       await signOut(auth);
-      //console.log("Usuário cadastrado e perfil atualizado!");
-      alert("Cadastro realizado com sucesso.")
+      alert("Cadastro realizado com sucesso.");
       navigate("/login");
     } catch (err) {
-      console.error("Erro ao cadastrar:", err.message);
-      setError(err.message);
+      console.error("Erro ao cadastrar:", err.code, err.message);
+      if (err.code === "auth/weak-password") {
+        setError("A senha deve conter pelo menos 6 caracteres.");
+      } else if (err.code === "auth/email-already-in-use") {
+        setError("Este email já está em uso. Tente fazer login ou usar outro email.");
+      } else {
+        setError("Erro ao cadastrar: " + err.message);
+      }
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '2rem auto' }}>
-      <h1>Cadastro</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+    <div className="cadastro-container">
+      <h1>Cadastro do usuário</h1>
+      {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <Input
           label="Nome"
@@ -52,7 +68,7 @@ function Cadastro() {
           name="nome"
           value={form.nome}
           onChange={handleChange}
-          placeholder="Digite seu nome"
+          placeholder="Digite o nome da companhia"
           autoComplete="name"
         />
         <Input
@@ -73,21 +89,12 @@ function Cadastro() {
           placeholder="Digite sua senha"
           autoComplete="current-password"
         />
-        <button type="submit" style={{
-          padding: '0.7rem',
-          width: '100%',
-          background: 'rgb(13, 80, 39)',
-          color: '#fff',
-          border: 'none',
-          fontSize: '15px',
-          fontWeight: 'bold',
-          borderRadius: '8px'
-        }}>
+        <button type="submit">
           Cadastrar
         </button>
-        <p style={{ textAlign: 'left', margin: '2rem' }}>
+        <p>
           Já possui cadastro?
-          <Link to="/login" style={{textDecoration: 'none'}}> Acesse seu login</Link>
+          <Link to="/login"> Acesse seu login</Link>
         </p>
       </form>
     </div>
