@@ -1,9 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./page/Home";
 import Cadastro from "./page/Cadastro";
 import Header from "./components/Header";
 import Login from "./page/Login/Login";
-import Erro from "./page/Erro";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./page/Dashboard/Dashboard";
 import ResetSenha from "./components/ResetSenha/ResetSenha"

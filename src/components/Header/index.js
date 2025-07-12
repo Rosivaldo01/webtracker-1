@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
-import './style.css';
+import "./style.css"; // CSS separado para organizar
 
 function Header() {
   const navigate = useNavigate();
@@ -25,21 +25,27 @@ function Header() {
   };
 
   return (
-    <header>
-      <h1>Web Tracker</h1>
-      <nav>
+    <header className="header-fixed">
+      <div className="header-left">Web Tracker</div>
+      <nav className="header-right">
         {user ? (
           <>
-            <span>👤 {user.displayName || "Usuário"}</span>
-            <Link to="#" onClick={handleLogout}>🚪 Sair da conta</Link>
+            <span className="user-name">👤 {user.displayName || "Usuário"}</span>
+            <button className="logout-btn" onClick={handleLogout}>
+              🚪 Sair
+            </button>
           </>
         ) : (
           <>
             {location.pathname === "/login" && (
-              <Link to="/cadastro">✍️ Cadastro</Link>
+              <Link to="/cadastro" className="nav-link">
+                ✍️ Cadastro
+              </Link>
             )}
             {location.pathname === "/cadastro" && (
-              <Link to="/login">🔑 Login</Link>
+              <Link to="/login" className="nav-link">
+                🔑 Login
+              </Link>
             )}
           </>
         )}

@@ -1,0 +1,287 @@
+/* Header fixo */
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgb(13, 80, 39);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  user-select: none;
+}
+
+.header-name {
+  font-size: 30px;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  font-size: 1rem;
+  font-weight: normal;
+  color: #ecf0f1;
+}
+
+.header-logout-btn {
+  background: #14532d;
+  border: none;
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.header-logout-btn:hover {
+  background: #992d22;
+}
+
+/* Conteúdo afastado do header */
+.dashboard-content {
+  padding-top: 100px; /* espaço pro header fixo */
+  max-width: 1024px;
+  margin: 0 auto;
+
+  /* Centralizando conteúdo vertical e horizontal */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Título */
+.page-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #34495e;
+  margin-bottom: 2rem;
+}
+
+/* Formulário */
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.register-form:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transform: scale(1.02);
+  cursor: auto;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.form-field input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-field input:focus {
+  border-color: #27ae60;
+  outline: none;
+}
+
+.register-btn {
+  padding: 12px;
+  background: rgb(13, 80, 39);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.register-btn:hover {
+  background: #14532d;
+  transform: scale(1.05);
+}
+
+/* Campo de pesquisa */
+.search-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.search-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #34495e;
+  margin-top: 2rem;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 40px 10px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: #27ae60;
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: darkgreen;
+}
+
+/* Lista de registros */
+.records-container {
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 1024px;
+}
+
+.records-list {
+  list-style: none;
+  padding: 0;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding: 15px 0;
+  flex-wrap: wrap;
+}
+
+.record-item > div:first-child {
+  flex: 1;
+  margin-right: 10px;
+}
+
+/* Inputs de edição */
+.edit-input {
+  padding: 6px;
+  margin: 0 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.edit-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Botões */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.edit-btn,
+.delete-btn,
+.save-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.edit-btn {
+  background: darkgreen;
+}
+.edit-btn:hover {
+  background: #14532d;
+  transform: scale(1.05);
+}
+
+.delete-btn {
+  background: darkred;
+}
+.delete-btn:hover {
+  background: #8b0000;
+  transform: scale(1.05);
+}
+
+.save-btn {
+  background: #2c3e50;
+}
+.save-btn:hover {
+  background: #1a252f;
+  transform: scale(1.05);
+}
+
+.cancel-btn {
+  background: #7f8c8d;
+}
+.cancel-btn:hover {
+  background: #636e72;
+  transform: scale(1.05);
+}
+
+/* Mensagem de lista vazia */
+.empty-msg {
+  text-align: center;
+  color: gray;
+  font-size: 1.1rem;
+}
